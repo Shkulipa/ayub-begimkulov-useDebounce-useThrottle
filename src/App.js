@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { debounce } from "lodash-es";
+import { debounce, throttle } from "lodash-es";
 import useLatest from "./hooks/useLatest";
 
 function useDebounce(cb, ms) {
@@ -27,6 +27,22 @@ function useDebounce(cb, ms) {
   useEffect(() => () => debouncedFn.cancel(), [debouncedFn]);
 
   return debouncedFn;
+}
+
+function useThrottle(cb, ms) {
+  const latestCb = useLatest(cb); 
+
+  const throttleFn = useMemo(
+    () => 
+      throttle((fn) => {
+        latestCb.current(fn);
+      }, ms), 
+    [ms, latestCb]
+  )
+
+  useEffect(() => () => throttleFn.cancel(), [throttleFn]);
+
+  return throttleFn;
 }
 
 function App() {
