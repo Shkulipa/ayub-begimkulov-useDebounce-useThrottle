@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { debounce, throttle } from "lodash-es";
 import useLatest from "./hooks/useLatest";
 
@@ -23,19 +23,55 @@ function makeDebounceHook(debounceFn) {
 const useDebounce = makeDebounceHook(debounce);
 const useThrottle = makeDebounceHook(throttle);
 
+function makeDebounceEffectHook(useDebounceHook) {
+  return function (cb, deps, ms) {
+    const [isInitialRender, setIsInitialRender] = useState(true);
+    const cleanUpFn = useRef();
+
+    const debouncedCb = useDebounceHook(() => {
+      cleanUpFn.current = cb();
+    }, ms);
+
+    useEffect(() => {
+      if (isInitialRender) {
+        setIsInitialRender(false);
+        return;
+      }
+
+      debouncedCb();
+
+      return () => {
+        if (typeof cleanUpFn.current === "function") {
+          cleanUpFn.current();
+          cleanUpFn.current = undefined;
+        }
+      };
+    }, [debouncedCb, ...deps]);
+  };
+}
+
+const useDebounceEffect = makeDebounceEffectHook(useDebounce);
+const useThrottleEffect = makeDebounceEffectHook(useThrottle);
+
 function App() {
-  const [query, setQuery] = useState();
+  const [query, setQuery] = useState("");
 
   console.log('re-render');
 
-  const makeReq = useDebounce(
-    () => console.log("make request with query:", query),
-    1000
-  )
+  useDebounceEffect(
+    () => {
+      console.log("make request with query: ", query);
+
+      return () => {
+        console.log("cancel request with query: ", query);
+      };
+    },
+    [query],
+    500
+  );
   
   const handleQueryChange = e => {
     const { value } = e.target;
-    makeReq(value);
     setQuery(value);
   }
 
