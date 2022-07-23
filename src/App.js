@@ -2,48 +2,26 @@ import { useState, useMemo, useEffect } from "react";
 import { debounce, throttle } from "lodash-es";
 import useLatest from "./hooks/useLatest";
 
-function useDebounce(cb, ms) {
-  /**
-   * @info
-   * 1. для сохранения ссылки на предыдущую функцию
-   */
-  const latestCb = useLatest(cb); 
+function makeDebounceHook(debounceFn) {
+  return function useDebounce(cb, ms) {
+    const latestCb = useLatest(cb); 
 
-  const debouncedFn = useMemo(
-    () => 
-      debounce((fn) => {
-        /**
-         * @info
-         * 2. меняется current свойство внутри 
-         * и по этому useMemo вызывается только один раз
-         * 
-         * если бы вместо (fn) => {...} использовалось cb с аргументов, это фенкиця каждый раз создавалась новая
-         */
-        latestCb.current(fn);
-      }, ms), 
-    [ms, latestCb]
-  )
+    const debouncedFn = useMemo(
+      () => 
+        debounceFn((fn) => {
+          latestCb.current(fn);
+        }, ms), 
+      [ms, latestCb]
+    )
 
-  useEffect(() => () => debouncedFn.cancel(), [debouncedFn]);
+    useEffect(() => () => debouncedFn.cancel(), [debouncedFn]);
 
-  return debouncedFn;
+    return debouncedFn;
+  }
 }
 
-function useThrottle(cb, ms) {
-  const latestCb = useLatest(cb); 
-
-  const throttleFn = useMemo(
-    () => 
-      throttle((fn) => {
-        latestCb.current(fn);
-      }, ms), 
-    [ms, latestCb]
-  )
-
-  useEffect(() => () => throttleFn.cancel(), [throttleFn]);
-
-  return throttleFn;
-}
+const useDebounce = makeDebounceHook(debounce);
+const useThrottle = makeDebounceHook(throttle);
 
 function App() {
   const [query, setQuery] = useState();
