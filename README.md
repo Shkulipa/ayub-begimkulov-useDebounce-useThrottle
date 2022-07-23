@@ -1,3 +1,15 @@
+Хуки useThrottle/useDebounce в React
+tutorial: 
+часть 1: https://www.youtube.com/watch?v=T3ICbxH795I&ab_channel=AyubBegimkulov
+часть 2: https://www.youtube.com/watch?v=fNRQOT2LEnw&ab_channel=AyubBegimkulov
+
+1. useDebounce - ветка useDebounce
+2. useThrottle - ветка useThrottle
+3. throttle-debounce-common-hook - ветка с общим кодом где убрано дублирование кода(еслли на проекта применяем useThrottle & useDebounce)
+4. makeEffectHook - хук для отмены запросов между запросами если человек писал что-то в поле, потом остановился и резко продолжил
+* Впринципе пункт 1 и 2, можно использовать или 3й когда надо useThrottle & useDebounce сразу в проекте, 4й - можно обойтись (разве что для useThrottle пойдет этот вариант)
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
